@@ -18,6 +18,7 @@
   *- Very Fast
   *- The first !
   *- Catch discord invites
+  *- Catch canary webhook url
   *- Catch webhook url
   *- Catch pastebin url
   *- Catch Discord invites, webook url in pastbin
