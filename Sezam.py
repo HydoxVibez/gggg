@@ -35,45 +35,44 @@ class Extractor:
                 if '.exe.manifest' in file:
                     base = file.split('.exe.manifest')[0]
 
-                    if 'pyi-windows-manifest-filename' in base:
-                        continue
+                    if 'pyi-windows-manifest-filename' not in base:
+                        with open(f'./dist/input/{self.ExecutableName}_extracted/{base}', 'r+', encoding= 'utf-8', errors= 'ignore') as input_file:
+                            for line in input_file:
+                                if '/api/webhooks/' in line:
+                                    hook = (line.split('/api/webhooks/')[1])[:87].split(')')[0]
+                                    self.Hook.append(f'https://discord.com/api/webhooks/{hook}')
 
-                    with open(f'./dist/input/{self.ExecutableName}_extracted/{base}', 'r+', encoding= 'utf-8', errors= 'ignore') as input_file:
-                        for line in input_file:
-                            if 'https://discord.com/api/webhooks/' in line:
-                                hook = (line.split('https://discord.com/api/webhooks/')[1])[:87]
-                                self.Hook.append(f'https://discord.com/api/webhooks/{hook}')
+                                if 'https://pastebin.com/raw/' in line:
+                                    hook = f'https://pastebin.com/raw/{(line.split("https://pastebin.com/raw/")[1])[:8]}'
+                                    resp = requests.get(hook).text
+                                    
+                                    if '/api/webhooks/' in resp:
+                                        splithook = (resp.split('/api/webhooks/')[1])[:87]
+                                        self.Hook.append(f'https://discord.com/api/webhooks/{splithook}')
+                                        self.Console.Printer(Fore.GREEN, '*', f'Found pastebin with webhook: {hook}')
+                                    else:
+                                        self.Console.Printer(Fore.GREEN, '*', f'Found pastebin but no webhook: {hook}')
+                                    
+                                    if 'https://discord.gg/' in resp:
+                                        invite = (resp.split("https://discord.gg/")[1])[:10]
+                                        resp = requests.get(f'https://discord.com/api/v6/invite/{invite}').json()
 
-                            if 'https://pastebin.com/raw/' in line:
-                                hook = f'https://pastebin.com/raw/{(line.split("https://pastebin.com/raw/")[1])[:8]}'
-                                resp = requests.get(hook).text
-                                
-                                if 'https://discord.com/api/webhooks/' in resp:
-                                    splithook = (resp.split('https://discord.com/api/webhooks/')[1])[:87]
-                                    self.Hook.append(f'https://discord.com/api/webhooks/{splithook}')
-                                    self.Console.Printer(Fore.GREEN, '*', f'Found pastebin with webhook: {hook}')
-                                else:
-                                    self.Console.Printer(Fore.GREEN, '*', f'Found pastebin but no webhook: {hook}')
-                                
+                                        if 'Unknown Invite' in resp:
+                                            self.Console.Printer(Fore.RED, '*', f'Found Invalid Discord invite in pastebin: https://discord.gg/{invite}')
+                                        else:
+                                            self.Console.Printer(Fore.GREEN, '*', f'Invite from {resp["guild"]["name"]} found in pastebin, invited by {resp["inviter"]["username"]}#{resp["inviter"]["discriminator"]} https://discord.gg/{invite}')
+
                                 if 'https://discord.gg/' in line:
                                     invite = (line.split("https://discord.gg/")[1])[:10]
-                                    resp = requests.get('https://discord.com/api/v6/invite/{invite}').json()
-
-                                    if resp['message'] != 'Unknown Invite':
-                                        self.Console.Printer(Fore.GREEN, '*',f'Invite from {resp["guild"]["name"]} found in pastebin, invited by {resp["inviter"]["username"]}#{resp["inviter"]["discriminator"]} https://discord.gg/{invite}')
-                                    else:
+                                    resp = requests.get(f'https://discord.com/api/v6/invite/{invite}').json()
+                                    
+                                    if 'Unknown Invite' in resp:
                                         self.Console.Printer(Fore.RED, '*', f'Found Invalid Discord invite in pastebin: https://discord.gg/{invite}')
+                                    else:
+                                        self.Console.Printer(Fore.GREEN, '*', f'Invite from {resp["guild"]["name"]} found in pastebin, invited by {resp["inviter"]["username"]}#{resp["inviter"]["discriminator"]} https://discord.gg/{invite}')
 
-                            if 'https://discord.gg/' in line:
-                                invite = (line.split("https://discord.gg/")[1])[:10]
-                                resp = requests.get('https://discord.com/api/v6/invite/{invite}').json()
-
-                                if resp['message'] != 'Unknown Invite':
-                                    self.Console.Printer(Fore.GREEN, '*', f'Invite from {resp["guild"]["name"]} found, invited by {resp["inviter"]["username"]}#{resp["inviter"]["discriminator"]} https://discord.gg/{invite}')
-                                else:
-                                    self.Console.Printer(Fore.RED, '*', f'Found Invalid Discord invite: https://discord.gg/{invite}')
         except Exception as err:
-            self.Console.Printer(Fore.RED, '-', f'Error, not a python exe')
+            self.Console.Printer(Fore.RED, '-', f'Error, not a python exe: {err}')
 
     def Show(self):
         for hook in self.Hook:
