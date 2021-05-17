@@ -57,24 +57,22 @@ class Extractor:
                                 
                                 if 'https://discord.gg/' in line:
                                     invite = (line.split("https://discord.gg/")[1])[:10]
-                                    resp = requests.get('https://discord.com/api/v6/invite/{invite}')
+                                    resp = requests.get('https://discord.com/api/v6/invite/{invite}').json()
 
-                                    if 'Unknown Invite' not in resp:
-                                        info = resp.json()
-                                        self.Console.Printer(Fore.GREEN, '*',f'Invite from {info["guild"]["name"]} found in pastebin, invited by {info["inviter"]["username"]}#{info["inviter"]["discriminator"]} https://discord.gg/{invite}')
+                                    if resp['message'] != 'Unknown Invite':
+                                        self.Console.Printer(Fore.GREEN, '*',f'Invite from {resp["guild"]["name"]} found in pastebin, invited by {resp["inviter"]["username"]}#{resp["inviter"]["discriminator"]} https://discord.gg/{invite}')
                                     else:
                                         self.Console.Printer(Fore.RED, '*', f'Found Invalid Discord invite in pastebin: https://discord.gg/{invite}')
 
                             if 'https://discord.gg/' in line:
                                 invite = (line.split("https://discord.gg/")[1])[:10]
-                                resp = requests.get('https://discord.com/api/v6/invite/{invite}')
+                                resp = requests.get('https://discord.com/api/v6/invite/{invite}').json()
 
-                                if 'Unknown Invite' not in resp:
-                                    info = resp.json()
-                                    self.Console.Printer(Fore.GREEN, '*',f'Invite from {info["guild"]["name"]} found, invited by {info["inviter"]["username"]}#{info["inviter"]["discriminator"]} https://discord.gg/{invite}')
+                                if resp['message'] != 'Unknown Invite':
+                                    self.Console.Printer(Fore.GREEN, '*', f'Invite from {resp["guild"]["name"]} found, invited by {resp["inviter"]["username"]}#{resp["inviter"]["discriminator"]} https://discord.gg/{invite}')
                                 else:
                                     self.Console.Printer(Fore.RED, '*', f'Found Invalid Discord invite: https://discord.gg/{invite}')
-        except:
+        except Exception as err:
             self.Console.Printer(Fore.RED, '-', f'Error, not a python exe')
 
     def Show(self):
@@ -83,16 +81,19 @@ class Extractor:
 
     def Fuck(self):
         for hook in self.Hook:
-            resp = requests.get(hook)
-            if 'Unknown Webhook' not in resp.text:
-                self.Console.Printer(Fore.YELLOW, '*', f'Hook name: {resp.json()["name"]}, spamming webhook')
-                for _ in range(15):
-                    requests.post(hook, json={'content': '> ||@everyone|| Sezam was here - https://github.com/Its-Vichy'})
-                requests.delete(hook)
+            try:
+                resp = requests.get(hook)
+                if 'Unknown Webhook' not in resp.text:
+                    self.Console.Printer(Fore.YELLOW, '*', f'Hook name: {resp.json()["name"]}, spamming webhook')
+                    for _ in range(15):
+                        requests.post(hook, json={'content': '> ||@everyone|| Sezam was here - https://github.com/Its-Vichy'})
+                    requests.delete(hook)
 
-                self.Console.Printer(Fore.CYAN, '+', 'Webhook deleted')
-            else:
-                self.Console.Printer(Fore.CYAN, '*', 'Webhook was dead')
+                    self.Console.Printer(Fore.CYAN, '+', 'Webhook deleted')
+                else:
+                    self.Console.Printer(Fore.CYAN, '*', 'Webhook was dead')
+            except Exception as err:
+                self.Console.Printer(Fore.RED, '-', f'Error, can\'t use this webhook')
 
 Console().PrintLogo()
 Ex = Extractor()
