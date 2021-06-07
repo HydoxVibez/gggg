@@ -33,7 +33,12 @@
 ## 🐺 Setup:
 ```cs
 /*
+  *- pip install -r requirements.txt
   *- Put your exe in /dist/input folder
+  *- python Sezam.py
+  *- Put executable name (without .exe)
+  *- Press enter
+  *- Enjoy :)
 */
 ```
 
