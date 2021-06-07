@@ -1,0 +1,6 @@
+colorama
+requests
+uuid
+uncompyle6
+unpy2exe
+pefile
