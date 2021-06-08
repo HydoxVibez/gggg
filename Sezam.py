@@ -1,3 +1,4 @@
+from update_check import isUpToDate, update
 from colorama import Fore, init; init()
 import os, requests
 
@@ -21,12 +22,19 @@ class Console:
 class Extractor:
     def __init__(self):
         self.ExecutableName = input(f'{Fore.WHITE}[{Fore.CYAN}?{Fore.WHITE}] File name: ') + '.exe'
+        self.DeletedHook    = (input(f'{Fore.WHITE}[{Fore.CYAN}?{Fore.WHITE}] Delete hook (y/n): ').lower())[:1]
+        self.SpamHook       = (input(f'{Fore.WHITE}[{Fore.CYAN}?{Fore.WHITE}] Spam hook (y/n): ').lower())[:1]
         self.Console = Console()
         self.Hook = [ ]
 
     def Uncompile(self):
         os.system(f'cd ./dist/input/ && python ../../Modules/pyinstxtractor.py "{self.ExecutableName}"')
         self.Console.PrintLogo()
+
+    def CheckUpdate(self):
+        if not isUpToDate(__file__, 'https://raw.githubusercontent.com/Its-Vichy/Sezam/main/Sezam.py'):
+            self.Console.Printer(Fore.YELLOW, '*', 'New update was found, downloading...')
+            update(__file__, 'https://raw.githubusercontent.com/Its-Vichy/Sezam/main/Sezam.py')
 
     def GetHooks(self):
         base  = ''
@@ -38,6 +46,9 @@ class Extractor:
                     if 'pyi-windows-manifest-filename' not in base:
                         with open(f'./dist/input/{self.ExecutableName}_extracted/{base}', 'r+', encoding= 'utf-8', errors= 'ignore') as input_file:
                             for line in input_file:
+                                if 'PYARMOR' in line:
+                                    self.Console.Printer(Fore.RED, '*', 'Pyarmor was detected')
+
                                 if '/api/webhooks/' in line:
                                     hook = (line.split('/api/webhooks/')[1])[:87].split(')')[0]
                                     self.Hook.append(f'https://discord.com/api/webhooks/{hook}')
@@ -72,7 +83,7 @@ class Extractor:
                                         self.Console.Printer(Fore.GREEN, '*', f'Invite from {resp["guild"]["name"]} found in pastebin, invited by {resp["inviter"]["username"]}#{resp["inviter"]["discriminator"]} https://discord.gg/{invite}')
 
         except Exception as err:
-            self.Console.Printer(Fore.RED, '-', f'Error, not a python exe: {err}')
+            self.Console.Printer(Fore.RED, '-', f'Error: {err}')
 
     def Show(self):
         for hook in self.Hook:
@@ -84,18 +95,25 @@ class Extractor:
                 resp = requests.get(hook)
                 if 'Unknown Webhook' not in resp.text:
                     self.Console.Printer(Fore.YELLOW, '*', f'Hook name: {resp.json()["name"]}, spamming webhook')
-                    for _ in range(15):
-                        requests.post(hook, json={'content': '> ||@everyone|| Sezam was here - https://github.com/Its-Vichy'})
-                    requests.delete(hook)
+                    
+                    if self.SpamHook == 'y':
+                        for _ in range(15):
+                            requests.post(hook, json={'content': '> ||@everyone|| Sezam was here - https://github.com/Its-Vichy/Sezam'})
+                    
+                    if self.DeletedHook == 'y':
+                        requests.delete(hook)
 
-                    self.Console.Printer(Fore.CYAN, '+', 'Webhook deleted')
+                        self.Console.Printer(Fore.CYAN, '+', 'Webhook deleted')
                 else:
                     self.Console.Printer(Fore.CYAN, '*', 'Webhook was dead')
             except Exception as err:
                 self.Console.Printer(Fore.RED, '-', f'Error, can\'t use this webhook')
 
+        self.Console.Printer(Fore.CYAN, '+', 'Finished')
+
 Console().PrintLogo()
 Ex = Extractor()
+Ex.CheckUpdate()
 Ex.Uncompile()
 Ex.GetHooks()
 Ex.Show()
