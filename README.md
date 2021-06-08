@@ -33,7 +33,7 @@
 ## 🐺 Setup:
 ```cs
 /*
-  *- pip install -r requirements.txt
+  *- Run Install.bat
   *- Put your exe in /dist/input folder
   *- python Sezam.py
   *- Put executable name (without .exe)
@@ -56,6 +56,7 @@
 #
 
 <img src="https://media.discordapp.net/attachments/843545198335229972/843690393182011412/unknown.png">
+<img src="https://media.discordapp.net/attachments/850461540377034822/851890384107470858/unknown.png">
 
 #
 
