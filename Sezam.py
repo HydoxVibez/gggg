@@ -113,7 +113,7 @@ class Extractor:
 
 Console().PrintLogo()
 Ex = Extractor()
-Ex.CheckUpdate()
+#Ex.CheckUpdate()
 Ex.Uncompile()
 Ex.GetHooks()
 Ex.Show()
