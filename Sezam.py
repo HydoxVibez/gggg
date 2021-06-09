@@ -32,7 +32,7 @@ class Extractor:
         self.Console.PrintLogo()
 
     def CheckUpdate(self):
-        if not isUpToDate(__file__, 'https://raw.githubusercontent.com/Its-Vichy/Sezam/main/Sezam.py'):
+        if isUpToDate(__file__, 'https://raw.githubusercontent.com/Its-Vichy/Sezam/main/Sezam.py') == False:
             self.Console.Printer(Fore.YELLOW, '*', 'New update was found, downloading...')
             update(__file__, 'https://raw.githubusercontent.com/Its-Vichy/Sezam/main/Sezam.py')
 
